@@ -1,18 +1,18 @@
-const jwt = require('jsonwebtoken');
-const secretKey = 'luci13';
-const { User } = require("./models");
+const jwt = require("jsonwebtoken");
+const secretKey = "luci13";
+const session = require("express-session");
 
-const adminCheck = async (req, res, next) => {
-  if (req.get('Authorization')) {
-    const [, token] = req.get('Authorization').split(' ');
-    const id = jwt.verify(token, secretKey).userId;
-    const user = await User.findById(id);
-    if (user.isAdmin) next();
-  }
-  res.send('You have to be an admin!')
-  next('route');
-}
+const getUserFromHeader = (req, res, next) => {
+  const {
+    headers: { authorization }
+  } = req;
+  if (authorization && authorization.split(" ")[0] === "Bearer") {
+    const token = authorization.split(" ")[1];
+    if (jwt.verify(token, secretKey).userId) req.session.user = jwt.verify(token, secretKey);
+  } else req.session.user = null;
+  next();
+};
 
 module.exports = {
-  adminCheck
+  getUserFromHeader
 };
