@@ -1,4 +1,4 @@
-const { getUserFromHeader } = require("./middlewares");
+const { getUserFromHeader, loggedInCheck, adminCheck } = require("./middlewares");
 const { Like, User, Post, Comment } = require("./models");
 
 const express = require("express");
@@ -38,44 +38,35 @@ app
     const posts = await Post.find({});
     res.send(posts);
   })
-  .post(async (req, res, next) => {
+  .post(loggedInCheck, async (req, res, next) => {
     if (!Object.keys(req.body).length) {
       return res.sendStatus(400);
     }
-    if (!req.session.user) res.sendStatus(401);
-    else {
-      const post = await Post.create({
-        ...req.body,
-        owner: req.session.user.userId,
-        approved: null
-      });
-      console.log(`Post ${post._id} waiting for the confirmation`);
-      res.send(post);
-    }
+    const post = await Post.create({
+      ...req.body,
+      owner: req.session.user.userId,
+      approved: null
+    });
+    console.log(`Post ${post._id} waiting for the confirmation`);
+    res.send(post);
   })
-  .delete(async (req, res) => {
-    if (req.session.user && req.session.user.isAdmin) {
-      const posts = await Post.remove({});
-      console.log("All posts successfully deleted");
-      res.send(posts);
-      console.log(req.session.user);
-    } else res.sendStatus(401);
+  .delete([loggedInCheck, adminCheck], async (req, res) => {
+    const posts = await Post.remove({});
+    console.log("All posts successfully deleted");
+    res.send(posts);
+    console.log(req.session.user);
   });
 
 app
   .route("/users")
-  .get(async (req, res) => {
-    if (req.session.user && req.session.user.isAdmin) {
-      const users = await User.find({});
-      res.send(users);
-    } else res.sendStatus(403);
+  .get([loggedInCheck, adminCheck], async (req, res) => {
+    const users = await User.find({});
+    res.send(users);
   })
-  .delete(async (req, res) => {
-    if (req.session.user && req.session.user.isAdmin) {
-      const users = await User.remove({});
-      console.log("Users successfully deleted");
-      res.send(users);
-    } else res.sendStatus(403);
+  .delete([loggedInCheck, adminCheck], async (req, res) => {
+    const users = await User.remove({});
+    console.log("Users successfully deleted");
+    res.send(users);
   });
 
 app
@@ -85,13 +76,11 @@ app
     const { login, posts } = await User.findById(id);
     res.send({ login, posts });
   })
-  .delete(async (req, res) => {
-    if (req.session.user && req.session.user.isAdmin) {
-      const id = req.params.id;
-      const user = await User.findByIdAndDelete(id);
-      console.log(`User ${user._id} successfully deleted`);
-      res.send(user);
-    } else res.sendStatus(403);
+  .delete([loggedInCheck, adminCheck], async (req, res) => {
+    const id = req.params.id;
+    const user = await User.findByIdAndDelete(id);
+    console.log(`User ${user._id} successfully deleted`);
+    res.send(user);
   });
 
 app
@@ -101,65 +90,59 @@ app
     const post = await Post.findById(id);
     res.send(post);
   })
-  .post(async (req, res) => {
+  .post(loggedInCheck, async (req, res) => {
     if (!Object.keys(req.body).length) {
       return res.sendStatus(400);
     }
     const id = req.params.id;
     if (req.body.comment) {
       // пришёл коммент
-      if (!req.session.user) res.sendStatus(401);
-      else {
-        const { text } = req.body.comment;
-        const comment = await Comment.create({
-          text,
-          post: id,
-          owner: req.session.user.userId
-        });
-        const post = await Post.findByIdAndUpdate(id, { $push: { comments: comment } }, { new: true });
-        console.log(`Post ${post._id} commented. W8 4 confirmation`);
-      }
+      const { text } = req.body.comment;
+      const comment = await Comment.create({
+        text,
+        post: id,
+        owner: req.session.user.userId
+      });
+      const post = await Post.findByIdAndUpdate(id, { $push: { comments: comment } }, { new: true });
+      console.log(`Post ${post._id} commented. W8 4 confirmation`);
     }
   })
-  .put(async (req, res) => {
+  .put(loggedInCheck, async (req, res) => {
     if (!Object.keys(req.body).length) {
       return res.sendStatus(400);
     }
     const id = req.params.id;
     const post = await Post.findById(id);
-    if (!req.session.user) res.sendStatus(401);
-    else {
-      if (req.body.like) {
-        // когда пришёл лайк, а не апдейт поста
-        const isLiked = post.likes.some(el => el.req.session.user.userId === req.session.user.userId);
-        if (isLiked) {
-          const post = await Post.findByIdAndUpdate(
-            id,
-            { $pull: { likes: { $in: { owner: req.session.user.userId } } } },
-            { new: true }
-          );
-          console.log(`Post ${post._id} liked`);
-        } else {
-          const like = await Like.create({
-            user: req.session.user.userId,
-            post: id
-          });
-          const post = await Post.findByIdAndUpdate(id, { $push: { likes: like } }, { new: true });
-          console.log(`Post ${post._id} unliked`);
-        }
-        res.send(post);
+    if (req.body.like) {
+      // когда пришёл лайк, а не апдейт поста
+      const isLiked = post.likes.some(el => el.req.session.user.userId === req.session.user.userId);
+      if (isLiked) {
+        const post = await Post.findByIdAndUpdate(
+          id,
+          { $pull: { likes: { $in: { owner: req.session.user.userId } } } },
+          { new: true }
+        );
+        console.log(`Post ${post._id} liked`);
       } else {
-        // когда юзер или админ апдейтит пост
-        const post = await Post.findByIdAndUpdate(id, { ...req.body, approved: null }, { new: true });
-        console.log(`Post ${post._id} waiting for the confirmation`);
-        res.send(post);
+        const like = await Like.create({
+          user: req.session.user.userId,
+          post: id
+        });
+        const post = await Post.findByIdAndUpdate(id, { $push: { likes: like } }, { new: true });
+        console.log(`Post ${post._id} unliked`);
       }
+      res.send(post);
+    } else {
+      // когда юзер или админ апдейтит пост
+      const post = await Post.findByIdAndUpdate(id, { ...req.body, approved: null }, { new: true });
+      console.log(`Post ${post._id} waiting for the confirmation`);
+      res.send(post);
     }
   })
-  .delete(async (req, res) => {
+  .delete(loggedInCheck, async (req, res) => {
     const id = req.params.id;
-    const postOwner = await Post.findById(id).owner;
-    if (req.session.user && (postOwner === req.session.user.userId || req.session.user.isAdmin)) {
+    const post = await Post.findById(id);
+    if (post.owner == req.session.user.userId || req.session.user.isAdmin) {
       const post = await Post.findByIdAndDelete(id);
       console.log(`Post ${post._id} successfully deleted`);
       res.send(post);
@@ -178,7 +161,7 @@ app.post("/register", async (req, res) => {
       isAdmin: false
     });
     console.log(`User ${user} successfully created`);
-    let token = jwt.sign({ login, userId: user._id }, secretKey);
+    let token = jwt.sign({ login, userId: user._id, isAdmin: user.isAdmin }, secretKey);
     res.send(token);
   }
 });
