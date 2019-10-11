@@ -1,14 +1,14 @@
 const jwt = require("jsonwebtoken");
-const secretKey = "luci13";
+const { models } = require("./database");
 
-const getUserFromHeader = (req, res, next) => {
+const getUserFromHeader = async (req, res, next) => {
   const {
     headers: { authorization }
   } = req;
   if (authorization && authorization.split(" ")[0] === "Bearer") {
     const token = authorization.split(" ")[1];
-    if (jwt.verify(token, secretKey).userId) {
-      req.session.user = jwt.verify(token, secretKey);
+    if (jwt.verify(token, process.env.SECRET_KEY).userId) {
+      req.session.user = await models.user.findById(jwt.verify(token, process.env.SECRET_KEY).userId);
     }
   } else req.session.user = null;
   next();
