@@ -1,12 +1,12 @@
 const mongoose = require("mongoose");
 const models = require("./models");
 
-mongoose.connect(`mongodb://localhost:27017/usersdb`, {
+mongoose.connect(`mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
 const db = mongoose.connection;
-db.on("error", () => console.log(process.env.DB_HOST));
+db.on("error", () => console.log("some DB error"));
 db.once("open", () => {
   console.log("DB connected");
 });
