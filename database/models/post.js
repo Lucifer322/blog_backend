@@ -3,15 +3,18 @@ const { ObjectId: ID } = mongoose;
 
 const schema = new mongoose.Schema(
   {
-    img: String,
-    text: String,
-    likes: [{ type: ID, ref: "Like" }],
-    comments: [{ type: ID, ref: "User" }],
-    userId: String,
+    title: String,
+    body: String,
+    attachments: [{ type: ID, ref: "Attachment" }],
+    likes: [{ type: ID, ref: "Like", autopopulate: true }],
+    comments: [{ type: ID, ref: "Comment" }],
     approved: Boolean,
-    owner: { type: ID, ref: "User" }
+    owner: { type: ID, ref: "User" },
+    createdAt: { type: Date, default: Date.now }
   },
   { versionKey: false }
 );
+
+schema.plugin(require("mongoose-autopopulate"));
 
 module.exports = mongoose.model("Post", schema);

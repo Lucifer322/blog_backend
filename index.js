@@ -1,10 +1,10 @@
+require("dotenv").config();
 const middlewares = require("./middlewares");
 const { db } = require("./database");
 const express = require("express");
 const session = require("express-session");
 const app = express();
 const controllers = require("./controllers");
-require("dotenv").config();
 
 app.use(express.static(__dirname + "/public"));
 app.use(express.json());
@@ -50,6 +50,12 @@ app
 app.post("/register", controllers.auth.register);
 
 app.post("/login", controllers.auth.login);
+
+app.post("/upload", [
+  controllers.uploads.uploadArray,
+  controllers.uploads.uploadFiles,
+  controllers.attachments.create
+]);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

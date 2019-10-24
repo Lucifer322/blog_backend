@@ -9,9 +9,16 @@ async function create(req, res) {
   if (!Object.keys(req.body).length) {
     return res.sendStatus(400);
   }
+  let { attachments, body, title } = req.body;
+  console.log(attachments);
+  attachments.forEach(el => (el.owner = req.session.user._id));
   const post = await models.post.create({
-    ...req.body,
-    owner: req.session.user.userId,
+    title,
+    body,
+    attachments,
+    comments: [],
+    likes: [],
+    owner: req.session.user._id,
     approved: null
   });
   console.log(`Post ${post._id} waiting for the confirmation`);
@@ -41,7 +48,7 @@ async function comment(req, res) {
     const comment = await models.comment.create({
       text,
       post: id,
-      owner: req.session.user.userId
+      owner: req.session.user._id
     });
     const post = await models.post.findByIdAndUpdate(id, { $push: { comments: comment } }, { new: true });
     console.log(`Post ${post._id} commented. W8 4 confirmation`);
@@ -59,16 +66,16 @@ async function update(req, res) {
   const post = await models.post.findById(id);
   if (req.body.like) {
     // когда пришёл лайк, а не апдейт поста
-    const userId = req.session.user.userId;
-    const isLiked = post.likes.some(el => el.userId === userId);
+    const userId = req.session.user._id.toString();
+    const isLiked = post.likes.some(el => el.owner == userId);
+    console.log(isLiked);
     if (isLiked) {
-      const like = await models.like.findOneAndDelete({ owner: req.session.user.userId, post: id });
-      console.log(like);
+      const like = await models.like.findOneAndDelete({ owner: req.session.user._id, post: id });
       const post = await models.post.findByIdAndUpdate(id, { $pull: { likes: like._id } }, { new: true });
       console.log(`Post ${post._id} unliked`);
     } else {
       const like = await models.like.create({
-        owner: req.session.user.userId,
+        owner: req.session.user._id,
         post: id
       });
       const post = await models.post.findByIdAndUpdate(id, { $push: { likes: like } }, { new: true });
@@ -77,7 +84,7 @@ async function update(req, res) {
     res.send(post);
   } else {
     // когда юзер или админ апдейтит пост
-    if (req.session.user.isAdmin || req.session.user.userId == post.owner) {
+    if (req.session.user.isAdmin || req.session.user._id == post.owner) {
       const post = await models.post.findByIdAndUpdate(id, { ...req.body, approved: null }, { new: true });
       console.log(`Post ${post._id} waiting for the confirmation`);
       res.send(post);
@@ -88,7 +95,7 @@ async function update(req, res) {
 async function removeById(req, res) {
   const id = req.params.id;
   const post = await models.post.findById(id);
-  if (post.owner == req.session.user.userId || req.session.user.isAdmin) {
+  if (post.owner == req.session.user._id || req.session.user.isAdmin) {
     const post = await models.post.findByIdAndDelete(id);
     console.log(`Post ${post._id} successfully deleted`);
     res.send(post);

@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const { models } = require("./database");
+const { models } = require("../database");
 
 const getUserFromHeader = async (req, res, next) => {
   const {

@@ -3,12 +3,12 @@ const { ObjectId: ID } = mongoose;
 
 const schema = new mongoose.Schema(
   {
-    text: String,
-    post: { type: ID, ref: "Post" },
     owner: { type: ID, ref: "User" },
-    createdAt: { type: Date, default: Date.now }
+    src: String,
+    type: String,
+    name: String
   },
   { versionKey: false }
 );
 
-module.exports = mongoose.model("Comment", schema);
+module.exports = mongoose.model("Attachment", schema);
