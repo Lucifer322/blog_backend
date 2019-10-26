@@ -5,6 +5,7 @@ const express = require("express");
 const session = require("express-session");
 const app = express();
 const controllers = require("./controllers");
+const asyncHandler = require("express-async-handler");
 
 app.use(express.static(__dirname + "/public"));
 app.use(express.json());
@@ -16,7 +17,7 @@ app.use(
     cookie: { secure: true }
   })
 );
-app.use(middlewares.getUserFromHeader);
+app.use(asyncHandler(middlewares.getUserFromHeader));
 
 db.once("open", () => {
   app.listen(3333, () => {
@@ -26,7 +27,7 @@ db.once("open", () => {
 
 app
   .route("/posts")
-  .get(controllers.posts.getPost)
+  .get(controllers.posts.getAll)
   .post([middlewares.loggedInCheck, controllers.posts.create])
   .delete([middlewares.loggedInCheck, middlewares.adminCheck, controllers.posts.remove]);
 
@@ -43,21 +44,22 @@ app
 app
   .route("/posts/:id")
   .get(controllers.posts.getById)
-  .post([middlewares.loggedInCheck, controllers.posts.comment])
   .put([middlewares.loggedInCheck, controllers.posts.update])
   .delete([middlewares.loggedInCheck, controllers.posts.removeById]);
+
+app.post("/comment", [middlewares.loggedInCheck, controllers.comment.create]);
+
+app.post("/like", [middlewares.loggedInCheck, controllers.like.toggle]);
 
 app.post("/register", controllers.auth.register);
 
 app.post("/login", controllers.auth.login);
 
 app.post("/upload", [
+  middlewares.loggedInCheck,
   controllers.uploads.uploadArray,
   controllers.uploads.uploadFiles,
   controllers.attachments.create
 ]);
 
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send("Something broke!");
-});
+app.use(middlewares.errorHandler);

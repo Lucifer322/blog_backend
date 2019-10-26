@@ -1,8 +1,8 @@
-const comment = require("./comment");
-const like = require("./like");
-const post = require("./post");
-const user = require("./user");
-const attachment = require("./attachment");
+const comment = require("./Comment");
+const like = require("./Like");
+const post = require("./Post");
+const user = require("./User");
+const attachment = require("./Attachment");
 
 module.exports = {
   comment,

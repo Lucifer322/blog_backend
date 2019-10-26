@@ -19,10 +19,7 @@ const upload = multer({ storage, limits, fileFilter });
 const uploadArray = upload.array("pics", 10);
 
 const uploadFiles = async (req, res, next) => {
-  //   for (const file of req.files) {
-  //     file.src = await uploadFile(file.path);
-  //   }
-  const promises = []; // то же что и выше только загружает паралельно
+  const promises = [];
   for (const file of req.files) {
     const promise = (async () => (file.src = await uploadFile(file.path)))();
     promises.push(promise);
