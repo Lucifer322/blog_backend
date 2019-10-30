@@ -1,11 +1,11 @@
 require("dotenv").config();
+require("express-async-errors");
 const middlewares = require("./middlewares");
 const { db } = require("./database");
 const express = require("express");
 const session = require("express-session");
 const app = express();
 const controllers = require("./controllers");
-const asyncHandler = require("express-async-handler");
 
 app.use(express.static(__dirname + "/public"));
 app.use(express.json());
@@ -17,7 +17,7 @@ app.use(
     cookie: { secure: true }
   })
 );
-app.use(asyncHandler(middlewares.getUserFromHeader));
+app.use(middlewares.getUserFromHeader);
 
 db.once("open", () => {
   app.listen(3333, () => {
@@ -61,5 +61,9 @@ app.post("/upload", [
   controllers.uploads.uploadFiles,
   controllers.attachments.create
 ]);
+
+app.use((req, res, next) => {
+  res.sendStatus(404);
+});
 
 app.use(middlewares.errorHandler);

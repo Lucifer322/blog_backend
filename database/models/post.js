@@ -4,13 +4,14 @@ const { ObjectId: ID } = mongoose;
 const schema = new mongoose.Schema(
   {
     title: String,
-    body: String,
+    text: String,
     attachments: [{ type: ID, ref: "Attachment" }],
     likes: [{ type: ID, ref: "Like", autopopulate: true }],
     comments: [{ type: ID, ref: "Comment" }],
     approved: Boolean,
     owner: { type: ID, ref: "User" },
-    createdAt: { type: Date, default: Date.now }
+    createdAt: { type: Date, default: Date.now() },
+    updatedTime: { type: Date, default: Date.now() }
   },
   { versionKey: false }
 );

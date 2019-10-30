@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const pwd = require("password-hash");
 
 async function register(req, res) {
+  if (!req.body.login || !req.body.password) return res.sendStatus(400);
   const { login, password } = req.body;
   if (await models.user.findOne({ login })) {
     res.send("Login already exist");
@@ -26,7 +27,7 @@ async function login(req, res) {
     let token = jwt.sign(user.toJSON(), process.env.SECRET_KEY);
     res.send(token);
     console.log("User successfully logged in");
-  } else res.send("Password is invalid");
+  } else res.send("Credentials is invalid");
 }
 
 module.exports = {

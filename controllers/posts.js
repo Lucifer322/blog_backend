@@ -6,13 +6,13 @@ async function getAll(req, res, next) {
 }
 
 async function create(req, res) {
-  if (!Object.keys(req.body).length) {
+  if (!req.body.text || !req.body.title) {
     return res.sendStatus(400);
   }
-  let { attachments, body, title } = req.body;
+  let { attachments, text, title } = req.body;
   const post = await models.post.create({
     title,
-    body,
+    text,
     attachments,
     comments: [],
     likes: [],
@@ -35,14 +35,12 @@ async function getById(req, res) {
 }
 
 async function update(req, res) {
-  if (!Object.keys(req.body).length) {
-    return res.sendStatus(400);
-  }
+  if (!Object.keys(req.body).length) return res.sendStatus(400);
   const post = await models.post.findById(req.params.id);
   if (req.session.user.isAdmin || req.session.user._id == post.owner) {
     const post = await models.post.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, approved: null },
+      { ...req.body, approved: null, updatedTime: Date.now() },
       { new: true }
     );
     console.log(`Post ${post._id} waiting for the confirmation`);

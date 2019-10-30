@@ -1,18 +1,18 @@
 const jwt = require("jsonwebtoken");
 const { models } = require("../database");
+const logger = require("../logger");
 
 async function errorHandler(err, req, res, next) {
   switch (err.name) {
     case "JsonWebTokenError":
       res.status(401).send("Invalid token");
       break;
-    case "UnauthorizedError":
-      res.status(401).send("Unauthorized");
+    case "InvalidData":
+      res.status(400).send("Incoming data is not a file");
       break;
     default:
-      if (!err.status || err.status >= 500) {
-        console.error(err);
-      }
+      logger.error(err);
+      res.sendStatus(err.status || 500);
       break;
   }
 }

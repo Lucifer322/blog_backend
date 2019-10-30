@@ -19,6 +19,11 @@ const upload = multer({ storage, limits, fileFilter });
 const uploadArray = upload.array("pics", 10);
 
 const uploadFiles = async (req, res, next) => {
+  if (!req.files) {
+    let error = new Error("Incoming data is not a files");
+    error.name = "InvalidData";
+    throw error;
+  }
   const promises = [];
   for (const file of req.files) {
     const promise = (async () => (file.src = await uploadFile(file.path)))();
