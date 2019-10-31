@@ -1,10 +1,6 @@
 const models = require("../database/models");
 
 async function create(req, res) {
-  if (!req.body.text || !req.body.postId) {
-    console.log("here");
-    return res.sendStatus(400);
-  }
   const { text, postId } = req.body;
   const comment = await models.comment.create({
     text,
@@ -16,6 +12,16 @@ async function create(req, res) {
   res.send(post);
 }
 
+async function remove(req, res) {
+  const comment = await models.comment.findById(req.params.id);
+  if (comment.owner == req.session.user._id || req.session.user.isAdmin) {
+    const comment = await models.comment.findByIdAndDelete(req.params.id);
+    console.log(`Comment ${comment._id} successfully deleted`);
+    res.send(comment);
+  } else res.sendStatus(403);
+}
+
 module.exports = {
-  create
+  create,
+  remove
 };

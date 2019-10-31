@@ -1,4 +1,3 @@
-const jwt = require("jsonwebtoken");
 const { models } = require("../database");
 const logger = require("../logger");
 
@@ -7,8 +6,8 @@ async function errorHandler(err, req, res, next) {
     case "JsonWebTokenError":
       res.status(401).send("Invalid token");
       break;
-    case "InvalidData":
-      res.status(400).send("Incoming data is not a file");
+    case "ValidationError":
+      res.status(400).send("Validation error");
       break;
     default:
       logger.error(err);
@@ -23,8 +22,8 @@ async function getUserFromHeader(req, res, next) {
   } = req;
   if (authorization && authorization.split(" ")[0] === "Bearer") {
     const token = authorization.split(" ")[1];
-    if (jwt.verify(token, process.env.SECRET_KEY)._id) {
-      req.session.user = await models.user.findById(jwt.verify(token, process.env.SECRET_KEY)._id);
+    if (await models.user.jwtVerify(token)) {
+      req.session.user = await models.user.jwtVerify(token);
     }
   } else req.session.user = null;
   next();

@@ -6,18 +6,9 @@ async function getAll(req, res, next) {
 }
 
 async function create(req, res) {
-  if (!req.body.text || !req.body.title) {
-    return res.sendStatus(400);
-  }
-  let { attachments, text, title } = req.body;
   const post = await models.post.create({
-    title,
-    text,
-    attachments,
-    comments: [],
-    likes: [],
-    owner: req.session.user._id,
-    approved: null
+    ...req.body,
+    owner: req.session.user._id
   });
   console.log(`Post ${post._id} waiting for the confirmation`);
   res.send(post);

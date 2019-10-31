@@ -49,6 +49,8 @@ app
 
 app.post("/comment", [middlewares.loggedInCheck, controllers.comment.create]);
 
+app.delete("/comment/:id", [middlewares.loggedInCheck, controllers.comment.remove]);
+
 app.post("/like", [middlewares.loggedInCheck, controllers.like.toggle]);
 
 app.post("/register", controllers.auth.register);

@@ -21,7 +21,7 @@ const uploadArray = upload.array("pics", 10);
 const uploadFiles = async (req, res, next) => {
   if (!req.files) {
     let error = new Error("Incoming data is not a files");
-    error.name = "InvalidData";
+    error.name = "ValidationError";
     throw error;
   }
   const promises = [];
