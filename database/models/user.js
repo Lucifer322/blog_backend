@@ -27,17 +27,17 @@ schema.methods.toJSON = function toJSON() {
 };
 
 schema.methods.verifyPassword = async function verifyPassword(plainPassword) {
-  return await pwd.verify(plainPassword, this.password);
+  return pwd.verify(plainPassword, this.password);
 };
 
 schema.methods.jwtSign = async function jwtSign() {
   const obj = this.toObject();
-  return await jwt.sign(obj, process.env.SECRET_KEY);
+  return jwt.sign(obj, process.env.SECRET_KEY);
 };
 
 schema.statics.jwtVerify = async function jwtVerify(token) {
   const { _id } = jwt.verify(token, process.env.SECRET_KEY);
-  return await this.findById(_id);
+  return this.findById(_id);
 };
 
 module.exports = mongoose.model("User", schema);

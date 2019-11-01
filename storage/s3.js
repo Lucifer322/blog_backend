@@ -24,7 +24,7 @@ const uploadFile = async path => {
       resolve(data.Location);
     });
   });
-  return await uploadPromise;
+  return uploadPromise;
 };
 
 module.exports = {
