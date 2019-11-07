@@ -6,6 +6,7 @@ const express = require("express");
 const session = require("express-session");
 const app = express();
 const controllers = require("./controllers");
+const cors = require("cors");
 
 app.use(express.static(__dirname + "/public"));
 app.use(express.json());
@@ -15,6 +16,11 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: { secure: true }
+  })
+);
+app.use(
+  cors({
+    "Access-Control-Allow-Origin": "*"
   })
 );
 app.use(middlewares.getUserFromHeader);

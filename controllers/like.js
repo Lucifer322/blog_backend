@@ -12,6 +12,7 @@ async function toggle(req, res) {
     const like = await models.like.findOneAndDelete({ owner: req.session.user._id, post: id });
     const post = await models.post.findByIdAndUpdate(id, { $pull: { likes: like._id } }, { new: true });
     console.log(`Post ${post._id} unliked`);
+    res.send(like);
   } else {
     const like = await models.like.create({
       owner: req.session.user._id,
@@ -19,8 +20,8 @@ async function toggle(req, res) {
     });
     const post = await models.post.findByIdAndUpdate(id, { $push: { likes: like } }, { new: true });
     console.log(`Post ${post._id} liked`);
+    res.send(like);
   }
-  res.send(post);
 }
 
 module.exports = {

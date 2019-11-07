@@ -28,10 +28,12 @@ async function getById(req, res) {
 async function update(req, res) {
   if (!Object.keys(req.body).length) return res.sendStatus(400);
   const post = await models.post.findById(req.params.id);
+  let approved = null;
+  if (req.session.user.isAdmin) approved = true;
   if (req.session.user.isAdmin || req.session.user._id == post.owner) {
     const post = await models.post.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, approved: null, updatedTime: Date.now() },
+      { ...req.body, approved, updatedTime: new Date().toLocaleString() },
       { new: true }
     );
     console.log(`Post ${post._id} waiting for the confirmation`);

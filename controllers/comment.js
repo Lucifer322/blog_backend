@@ -1,11 +1,14 @@
 const models = require("../database/models");
 
 async function create(req, res) {
+  let approved = null;
+  if (req.session.user.isAdmin) approved = true;
   const { text, postId } = req.body;
   const comment = await models.comment.create({
     text,
     post: postId,
-    owner: req.session.user._id
+    owner: req.session.user._id,
+    approved
   });
   const post = await models.post.findByIdAndUpdate(postId, { $push: { comments: comment } }, { new: true });
   console.log(`Post ${post._id} commented. W8 4 confirmation`);

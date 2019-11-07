@@ -13,7 +13,7 @@ async function register(req, res) {
     });
     console.log(`User ${user} successfully created`);
     let token = await user.jwtSign();
-    res.send(token);
+    res.send({ token, userId: user._id });
   }
 }
 
@@ -22,7 +22,7 @@ async function login(req, res) {
   const user = await models.user.findOne({ login });
   if (user && user.verifyPassword(password)) {
     const token = await user.jwtSign();
-    res.send(token);
+    res.send({ token, userId: user._id });
     console.log("User successfully logged in");
   } else res.send("Credentials is invalid");
 }
