@@ -12,7 +12,8 @@ const uploadFile = async path => {
   const params = {
     Bucket: process.env.S3_BUCKET,
     Key: new Date().toString(),
-    Body: file
+    Body: file,
+    ACL: "public-read"
   };
 
   const uploadPromise = new Promise((resolve, reject) => {

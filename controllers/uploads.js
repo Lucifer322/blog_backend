@@ -16,20 +16,15 @@ const fileFilter = (req, file, cb) => {
 const limits = { fileSize: 5200000 };
 const upload = multer({ storage, limits, fileFilter });
 
-const uploadArray = upload.array("pics", 10);
+const uploadArray = upload.single("pics");
 
 const uploadFiles = async (req, res, next) => {
-  if (!req.files) {
-    let error = new Error("Incoming data is not a files");
+  if (!req.file) {
+    let error = new Error("Incoming data is not a file");
     error.name = "ValidationError";
     throw error;
   }
-  const promises = [];
-  for (const file of req.files) {
-    const promise = (async () => (file.src = await uploadFile(file.path)))();
-    promises.push(promise);
-  }
-  await Promise.all(promises);
+  req.file.src = await uploadFile(req.file.path);
   next();
 };
 

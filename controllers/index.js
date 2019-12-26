@@ -3,7 +3,7 @@ const users = require("./users");
 const auth = require("./auth");
 const uploads = require("./uploads");
 const attachments = require("./attachments");
-const comment = require("./comment");
+const comments = require("./comments");
 const like = require("./like");
 
 module.exports = {
@@ -13,5 +13,5 @@ module.exports = {
   attachments,
   users,
   like,
-  comment
+  comments
 };

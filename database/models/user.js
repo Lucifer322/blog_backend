@@ -5,8 +5,8 @@ const pwd = require("password-hash");
 
 const schema = new mongoose.Schema(
   {
-    login: String,
-    password: String,
+    login: { type: String, required: true, min: 5, max: 16 },
+    password: { type: String, required: true, min: 5, max: 32 },
     posts: [{ type: ID, ref: "Post" }],
     isAdmin: Boolean
   },

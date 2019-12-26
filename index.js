@@ -53,9 +53,13 @@ app
   .put([middlewares.loggedInCheck, controllers.posts.update])
   .delete([middlewares.loggedInCheck, controllers.posts.removeById]);
 
-app.post("/comment", [middlewares.loggedInCheck, controllers.comment.create]);
+app.route("/comments")
+  .post([middlewares.loggedInCheck, controllers.comments.create])
+  .get([middlewares.loggedInCheck, middlewares.adminCheck, controllers.comments.getAll])
 
-app.delete("/comment/:id", [middlewares.loggedInCheck, controllers.comment.remove]);
+app.route("/comment/:id")
+  .delete([middlewares.loggedInCheck, controllers.comments.remove])
+  .put([middlewares.loggedInCheck, middlewares.adminCheck, controllers.comments.approve])
 
 app.post("/like", [middlewares.loggedInCheck, controllers.like.toggle]);
 
