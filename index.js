@@ -29,6 +29,10 @@ db.once('open', () => {
   app.listen(process.env.PORT);
 });
 
+app.get('/', function(req, res) {
+  res.redirect('/posts');
+});
+
 app
   .route('/posts')
   .get(controllers.posts.getAll)
