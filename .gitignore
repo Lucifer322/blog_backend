@@ -4,4 +4,3 @@ package-lock.json
 errors.log
 .env
 .DS_Store
-tmp/my-uploads/*
