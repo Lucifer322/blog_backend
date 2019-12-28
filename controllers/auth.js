@@ -9,7 +9,7 @@ async function register(req, res) {
     const user = await models.user.create({
       login,
       password,
-      isAdmin: true,
+      isAdmin: false,
     });
     console.log(`User ${user} successfully created`);
     let token = await user.jwtSign();
