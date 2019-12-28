@@ -13,7 +13,7 @@ async function errorHandler(err, req, res, next) {
       res.status(400).send('Validation error');
       break;
     default:
-      logger.error(err);
+      console.error(err);
       res.sendStatus(err.status || 500);
       break;
   }

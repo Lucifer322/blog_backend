@@ -26,8 +26,6 @@ async function getById(req, res) {
 }
 
 async function update(req, res) {
-  console.log(req.body.text.length);
-  console.log(req.body.text.replace(/<.+?>/g, '').length);
   if (!Object.keys(req.body).length) return res.sendStatus(400);
   const post = await models.post.findById(req.params.id);
   let approved = req.session.user.isAdmin || null;
