@@ -12,6 +12,9 @@ async function errorHandler(err, req, res, next) {
     case 'CastError':
       res.status(400).send('Validation error');
       break;
+    case 'MulterError':
+      res.status(400).send('Image too large');
+      break;
     default:
       console.error(err);
       res.sendStatus(err.status || 500);
