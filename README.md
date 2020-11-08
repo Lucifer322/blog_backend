@@ -14,5 +14,7 @@ The frontend is SPA written on React, Redux and many npm packages.
 
 CRUD with NodeJS(Express.js using MVC), MongoDB(Mongoose) and AWS storage on backend.
 
+### Heroku link
+https://safe-plains-32036.herokuapp.com
 ### Frontend link
 https://github.com/alexlance13/blog_frontend
